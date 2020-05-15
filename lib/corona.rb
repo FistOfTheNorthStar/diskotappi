@@ -13,27 +13,39 @@ class Corona
     return if (m.message =~ /\A!c/).nil?
 
     location = m.message.split('!c ').last
-    
+    temp = fetch_corona_total
+    return m.channel.notice("Corona error fetching data!") unless temp   
     if location == '!c'
-      temp = fetch_corona_total
-      return m.channel.notice("Corona error fetching data!") unless temp
+      #temp = fetch_corona_total
+      #return m.channel.notice("Corona error fetching data!") unless temp
 
       m.channel.notice("Corona totals. New confirmed: #{temp['Global']['NewConfirmed']}, total confirmed #{temp['Global']['TotalConfirmed']}, new deaths: #{temp['Global']['NewDeaths']}, total deaths: #{temp['Global']['TotalDeaths']}, new recovered: #{temp['Global']['NewRecovered']}, total recovered #{temp['Global']['TotalRecovered']}!")
     else
       
-      location = location.strip.gsub(" ", "-")
-      corona = fetch_corona(location)
+      location = location.strip.gsub(" ", "-").downcase.capitalize
+      #corona = fetch_corona(location)
+      
+      #return m.channel.notice("Corona error fetching data!") unless corona
 
-      return m.channel.notice("Corona error fetching data!") unless corona
+      #temp = corona.last
+      countries = temp['Countries']
+      countries.each do |country|
+        if country['Country'] == location
+          place        = country['Country']
+          newconfirmed = country['NewConfirmed']
+          confirmed    = country['TotalConfirmed']
+          newdeaths    = country['NewDeaths']
+          deaths       = country['TotalDeaths']
+          recovered    = country['TotalRecovered']
+          date_c       = temp['Date']
 
-      temp = corona.last
-      place       = temp['Country']
-      confirmed   = temp['Confirmed']
-      deaths      = temp['Deaths']
-      recovered   = temp['Recovered']
-      date_c      = temp['Date']
+          m.channel.notice("Corona in #{place}, new confirmed: #{newconfirmed}, confirmed: #{confirmed}, new deaths: #{newdeaths}, deaths: #{deaths}, recovered: #{recovered}, date: #{date_c}")
 
-      m.channel.notice("Corona in #{place}, confirmed: #{confirmed}, deaths: #{deaths}, recovered: #{recovered}, date: #{date_c}")
+          break
+        end
+      end
+
+      #m.channel.notice("Corona in #{place}, new confirmed: #{newconfirmed}, confirmed: #{confirmed}, new deaths: #{newdeaths}, deaths: #{deaths}, recovered: #{recovered}, date: #{date_c}")
     end
   end
 
